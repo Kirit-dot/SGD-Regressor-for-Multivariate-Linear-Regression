@@ -15,95 +15,70 @@ To write a program to predict the price of the house and number of occupants in 
 
 ## Program:
 ```
-# Ex:No 4
-#Manual Implementation using Numpy
-import numpy as np
-
-# ------------------------------
-# Step 1: Sample dataset
-# ------------------------------
-# Features: [Hours Studied, Attendance, Previous Marks]
-X = np.array([
-    [2, 80, 50],
-    [3, 60, 40],
-    [5, 90, 70],
-    [7, 85, 80],
-    [9, 95, 90]
-], dtype=float)
-
-# Target: Marks Scored
-y = np.array([50, 45, 70, 80, 95], dtype=float)
-
-# ------------------------------
-# Step 2: Feature normalization
-# ------------------------------
-X_mean = X.mean(axis=0)
-X_std = X.std(axis=0)
-X = (X - X_mean) / X_std
-
-# Add bias term (intercept)
-X = np.c_[np.ones(X.shape[0]), X]  # shape becomes (n_samples, n_features + 1)
-
-# ------------------------------
-# Step 3: Initialize weights
-# ------------------------------
-n_features = X.shape[1]
-weights = np.zeros(n_features)
-
-# Hyperparameters
-learning_rate = 0.01
-epochs = 1000
-
-# ------------------------------
-# Step 4: Stochastic Gradient Descent
-# ------------------------------
-for epoch in range(epochs):
-    for i in range(X.shape[0]):
-        xi = X[i]
-        yi = y[i]
-        y_pred = np.dot(xi, weights)
-        error = y_pred - yi
-        # Update weights
-        weights -= learning_rate * error * xi
-
-print("Trained Weights (including intercept):", weights)
-
-# ------------------------------
-# Step 5: Make predictions
-# ------------------------------
-y_pred_all = np.dot(X, weights)
-print("Predicted values:", y_pred_all)
-
-
-#Using scikit-learn SGDRegressor
+Ex No: 4 import numpy as np
 from sklearn.linear_model import SGDRegressor
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-# Features and target
+# Sample dataset
+# Features: [house_size_sqft, number_of_rooms]
 X = np.array([
-    [2, 80, 50],
-    [3, 60, 40],
-    [5, 90, 70],
-    [7, 85, 80],
-    [9, 95, 90]
+    [800, 2],
+    [1200, 3],
+    [1500, 3],
+    [1800, 4],
+    [2000, 4],
+    [2200, 5],
+    [2500, 5]
 ])
-y = np.array([50, 45, 70, 80, 95])
+
+# Targets: [house_price, number_of_occupants]
+y = np.array([
+    [150000, 2],
+    [200000, 3],
+    [240000, 3],
+    [300000, 4],
+    [350000, 4],
+    [400000, 5],
+    [450000, 6]
+])
+
+# Split data into training and testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Feature scaling
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-# Create SGD Regressor
-sgd_reg = SGDRegressor(max_iter=1000, learning_rate='invscaling', eta0=0.01, random_state=42)
-sgd_reg.fit(X_scaled, y)
+# SGD Regressor model (wrapped for multi-output prediction)
+model = MultiOutputRegressor(SGDRegressor(max_iter=1000, learning_rate='invscaling', eta0=0.01))
 
-# Coefficients and intercept
-print("Weights (coefficients):", sgd_reg.coef_)
-print("Intercept:", sgd_reg.intercept_)
+# Train the model
+model.fit(X_train, y_train)
 
-# Predictions
-y_pred = sgd_reg.predict(X_scaled)
-print("Predicted values:", y_pred)
+# Test prediction
+prediction = model.predict(X_test)
+
+print("Test Input (Scaled):")
+print(X_test)
+
+print("\nPredicted [House Price, Occupants]:")
+print(prediction)
+
+print("\nActual Values:")
+print(y_test)
+
+# Predict for a new house
+new_house = np.array([[2100, 4]])
+new_house_scaled = scaler.transform(new_house)
+
+new_prediction = model.predict(new_house_scaled)
+
+print("\nPrediction for new house (2100 sqft, 4 rooms):")
+print("Estimated Price:", new_prediction[0][0])
+print("Estimated Occupants:", round(new_prediction[0][1]))
 
 /*
 Program to implement the multivariate linear regression model for predicting the price of the house and number of occupants in the house with SGD regressor.
@@ -114,6 +89,7 @@ RegisterNumber:  25015046
 
 ## Output:
 ![multivariate linear regression model for predicting the price of the house and number of occupants in the house](sam.png)
+<img width="474" height="323" alt="image" src="https://github.com/user-attachments/assets/dfbb0b8d-7f7a-49a8-b7d2-b6277d5957d2" />
 
 
 ## Result:
